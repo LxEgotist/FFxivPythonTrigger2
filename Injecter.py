@@ -2,7 +2,6 @@ from FFxivPythonTrigger.memory.res import kernel32, structure
 from FFxivPythonTrigger.memory import process, memory
 import ctypes
 import locale
-import atexit
 import sys
 import os
 from json import dumps
@@ -10,7 +9,15 @@ import _thread
 import socket
 import time
 
-atexit.register(input, "<press enter to exit>")
+try:
+    is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+except:
+    is_admin = False
+if not is_admin:
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, sys.argv[0], None, 1)
+    exit()
+
+endl = "\n<press enter to exit>"
 
 name = "ffxiv_dx11.exe"
 pid = None
@@ -19,11 +26,11 @@ for p in process.list_processes():
         pid = p.th32ProcessID
         break
 if pid is None:
-    print("game process not found, please run the game first")
+    input("game process not found, please run the game first" + endl)
     exit()
 handler = kernel32.OpenProcess(structure.PROCESS.PROCESS_ALL_ACCESS.value, False, pid)
 if not handler:
-    print("could not open process")
+    input("could not open process" + endl)
     exit()
 
 
@@ -44,7 +51,7 @@ if python_module:
 else:
     python_lib_h = process.inject_dll(bytes(python_lib, 'ascii'), handler)
     if not python_lib_h:
-        print("inject failed")
+        print("inject failed" + endl)
         exit()
 
 local_handle = kernel32.GetModuleHandleW(python_version)
@@ -55,7 +62,6 @@ funcs = {k: dif + kernel32.GetProcAddress(local_handle, k) for k in [b'Py_Initia
 param_addr = memory.allocate_memory(4, handler)
 memory.write_memory(ctypes.c_int, param_addr, 1, handler)
 process.start_thread(funcs[b'Py_InitializeEx'], param_addr, handler)
-
 
 wdir = os.path.abspath('.')
 log_path = os.path.join(wdir, 'out.log').replace("\\", "\\\\")
@@ -80,7 +86,7 @@ shellcode = shellcode.encode('ascii')
 shellcode_addr = memory.allocate_memory(len(shellcode), handler)
 written = ctypes.c_ulonglong(0)
 memory.write_bytes(shellcode_addr, shellcode, handler=handler)
-_thread.start_new_thread(process.start_thread, (funcs[b'PyRun_SimpleString'], shellcode_addr,),{'handler':handler})
+_thread.start_new_thread(process.start_thread, (funcs[b'PyRun_SimpleString'], shellcode_addr,), {'handler': handler})
 print("loading...")
 HOST, PORT = "127.0.0.1", 3520
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
