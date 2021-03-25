@@ -4,6 +4,16 @@ from .process import CURRENT_PROCESS_HANDLER
 from .exception import WinAPIError
 
 
+def allocate_memory(size, handle=CURRENT_PROCESS_HANDLER, allocation_type=None, protection_type=None):
+    if not allocation_type:
+        allocation_type = structure.MEMORY_STATE.MEM_COMMIT.value
+    if not protection_type:
+        protection_type = structure.MEMORY_PROTECTION.PAGE_EXECUTE_READWRITE.value
+    windll.kernel32.SetLastError(0)
+    address = kernel32.VirtualAllocEx(handle, None, size, allocation_type, protection_type)
+    return address
+
+
 def virtual_query(address):
     mbi = structure.MEMORY_BASIC_INFORMATION()
     if kernel32.VirtualQueryEx(CURRENT_PROCESS_HANDLER, address, byref(mbi), sizeof(mbi)) == sizeof(structure.MEMORY_BASIC_INFORMATION):
@@ -82,10 +92,10 @@ def read_string(address: int, size: int = 100, coding: str = 'utf-8') -> str:
     return read_memory(c_char * size, address).value.decode(coding, errors='ignore')
 
 
-def write_bytes(address: int, data, size=None) -> None:
+def write_bytes(address: int, data, size=None, handler=CURRENT_PROCESS_HANDLER) -> None:
     windll.kernel32.SetLastError(0)
     dst = cast(address, c_char_p)
-    res = kernel32.WriteProcessMemory(CURRENT_PROCESS_HANDLER, dst, data, size or len(data), None)
+    res = kernel32.WriteProcessMemory(handler, dst, data, size or len(data), None)
     error_code = windll.kernel32.GetLastError()
     if error_code:
         windll.kernel32.SetLastError(0)
@@ -93,9 +103,9 @@ def write_bytes(address: int, data, size=None) -> None:
     return res
 
 
-def write_memory(data_type, address: int, data):
+def write_memory(data_type, address: int, data, handler=CURRENT_PROCESS_HANDLER):
     raw = cast((data_type * 1)(data), POINTER(c_ubyte))
-    write_bytes(address,raw,sizeof(data_type))
+    write_bytes(address, raw, sizeof(data_type), handler)
 
 
 def write_string(address: int, data: str, coding: str = 'utf-8', size: int = None) -> None:

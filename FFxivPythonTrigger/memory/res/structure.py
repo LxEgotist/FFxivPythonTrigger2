@@ -29,11 +29,11 @@ class LUID_AND_ATTRIBUTES(ctypes.Structure):
         self.attributes |= SE_TOKEN_PRIVILEGE.SE_PRIVILEGE_ENABLED
 
     def get_name(self):
-        import pymem.ressources.advapi32
+        from . import advapi32
 
         size = ctypes.c_ulong(10240)
         buf = ctypes.create_unicode_buffer(size.value)
-        res = pymem.ressources.advapi32.LookupPrivilegeName(None, self.LUID, buf, size)
+        res = advapi32.LookupPrivilegeName(None, self.LUID, buf, size)
         if res == 0:
             raise RuntimeError("Could not LookupPrivilegeName")
         return buf[:size.value]

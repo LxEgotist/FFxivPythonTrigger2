@@ -225,5 +225,3 @@ try:
         FFxiv_Version = fi.read()
 except FileNotFoundError:
     FFxiv_Version = None
-
-_logger.info("FFxiv python trigger initialization complete")
