@@ -9,9 +9,14 @@ from FFxivPythonTrigger import *
 Logger.print_log_level = Logger.DEBUG
 try:
     register_module("SocketLogger")
+
+    # core
     register_modules(["HttpApi", "XivMemory", "XivMagic", "Command", "LogHookFix"])
-    register_modules(["CutsceneSkipper", "SuperJump", "Zoom", "Teleporter","XivCombo"])
-    register_modules(["DebugExec"])
+
+    # functions
+    register_modules(["CutsceneSkipper", "SuperJump", "Zoom", "Teleporter", "XivCombo"])
+
+    register_modules(["SpeedHack", "DebugExec","SkillAniUnlocker"])
     start()
 except Exception:
     pass
