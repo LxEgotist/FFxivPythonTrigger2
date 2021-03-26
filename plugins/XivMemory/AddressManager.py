@@ -55,6 +55,12 @@ zone_sig = "0f b7 ?? ?? ?? ?? ?? 48 8d ?? ?? ?? f3 0f ?? ?? 33 d2"
 zone_addr = _am.get("zone", scan_address, zone_sig, cmd_len=7)
 
 ##########
+# skill animation lock
+##########
+skill_ani_lock_sig = "F3 0F ? ? ? ? ? ? 41 F6 47 20"
+skill_ani_lock_addr = _am.get("skill animation lock", scan_address, skill_ani_lock_sig, cmd_len=8)
+
+##########
 # chat log
 ##########
 chat_log_sig = "48 8b da 49 8b f8 41 8b d1 48 8b f1 ?? ?? ?? ?? ?? 48 8d 05"

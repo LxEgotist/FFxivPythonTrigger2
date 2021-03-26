@@ -28,17 +28,11 @@ for p in process.list_processes():
 if pid is None:
     input("game process not found, please run the game first" + endl)
     exit()
+
 handler = kernel32.OpenProcess(structure.PROCESS.PROCESS_ALL_ACCESS.value, False, pid)
 if not handler:
     input("could not open process" + endl)
     exit()
-
-
-def find_existing_interpreter(_python_version):
-    _local_handle = kernel32.GetModuleHandleW(_python_version)
-    module = process.module_from_name(_python_version)
-    return module.lpBaseOfDll
-
 
 # find the python library
 python_version = "python{0}{1}.dll".format(sys.version_info.major, sys.version_info.minor)
@@ -47,7 +41,7 @@ python_lib = process.module_from_name(python_version).filename
 # Find or inject python module
 python_module = process.module_from_name(python_version, handler)
 if python_module:
-    python_lib_h = find_existing_interpreter(python_version)
+    python_lib_h = python_module.lpBaseOfDll
 else:
     python_lib_h = process.inject_dll(bytes(python_lib, 'ascii'), handler)
     if not python_lib_h:
@@ -82,12 +76,14 @@ except:
     'Entrance.py',
     err_path
 )
+
 shellcode = shellcode.encode('ascii')
 shellcode_addr = memory.allocate_memory(len(shellcode), handler)
 written = ctypes.c_ulonglong(0)
 memory.write_bytes(shellcode_addr, shellcode, handler=handler)
 _thread.start_new_thread(process.start_thread, (funcs[b'PyRun_SimpleString'], shellcode_addr,), {'handler': handler})
-print("loading...")
+
+print("waiting for initialization...")
 HOST, PORT = "127.0.0.1", 3520
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 while True:

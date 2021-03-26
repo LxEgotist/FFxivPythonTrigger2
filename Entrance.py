@@ -16,7 +16,7 @@ try:
     # functions
     register_modules(["CutsceneSkipper", "SuperJump", "Zoom", "Teleporter", "XivCombo"])
 
-    register_modules(["SpeedHack", "DebugExec","SkillAniUnlocker"])
+    register_modules(["SpeedHack", "DebugExec", "SkillAniUnlocker", "XivCombat"])
     start()
 except Exception:
     pass

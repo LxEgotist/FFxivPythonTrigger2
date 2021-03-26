@@ -42,6 +42,8 @@ class ActorTable(ActorTableNode * 100):
             if main.id in target:
                 target.remove(main.id)
                 yield main
+            if not target:
+                break
 
 
 actor_table:ActorTable = read_memory(ActorTable, actor_table_addr)

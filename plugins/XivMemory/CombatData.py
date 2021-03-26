@@ -13,6 +13,14 @@ class CombatData(object):
     _enemies: Enemies = read_memory(Enemies, AddressManager.enemies_base_addr)
 
     @property
+    def skill_ani_lock(self):
+        return read_memory(c_float, AddressManager.skill_ani_lock_addr)
+
+    @skill_ani_lock.setter
+    def skill_ani_lock(self, value):
+        write_float(AddressManager.skill_ani_lock_addr, float(value))
+
+    @property
     def enemies(self) -> Combat.Enemies:
         return self._enemies.value
 
