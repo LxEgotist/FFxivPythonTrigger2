@@ -30,7 +30,7 @@ from FFxivPythonTrigger import api
 
 
 def step_to_skill(step):
-    return 15988 + step if step > 0 else 15989
+    return 15998 + step if step > 0 else 15999
 
 
 def single(me):

@@ -2,13 +2,21 @@ from FFxivPythonTrigger import PluginBase, api, lumina
 from Lumina.Excel.GeneratedSheets import Action
 from traceback import format_exc
 from time import sleep
-from . import LogicData, Machinist
+from . import LogicData
 
 action_sheet = lumina.lumina.GetExcelSheet[Action]()
 command = "@aCombat"
 
-fight_strategies = dict()| Machinist.fight_strategies
+fight_strategies = dict()
 common_strategies = dict()
+
+from . import Machinist, Gunbreaker, DarkKnight, Warrior, Dancer
+
+fight_strategies |= Machinist.fight_strategies
+fight_strategies |= Gunbreaker.fight_strategies
+fight_strategies |= DarkKnight.fight_strategies
+fight_strategies |= Warrior.fight_strategies
+fight_strategies |= Dancer.fight_strategies
 
 
 class ContinueException(Exception):
