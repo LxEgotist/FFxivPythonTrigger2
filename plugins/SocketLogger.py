@@ -61,3 +61,4 @@ class SocketLogger(PluginBase):
     def _onunload(self):
         close()
         self.server.shutdown()
+        self.server.server_close()

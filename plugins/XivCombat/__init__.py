@@ -9,6 +9,7 @@ command = "@aCombat"
 
 fight_strategies = dict()
 common_strategies = dict()
+is_area_action_cache = dict()
 
 from . import Machinist, Gunbreaker, DarkKnight, Warrior, Dancer
 
@@ -36,7 +37,14 @@ def get_mo_target():
 
 
 def use_skill(action_id, target_id=0xe0000000):
-    api.XivMemory.combat_data.skill_queue.use_skill(action_id, target_id)
+    if action_id not in is_area_action_cache:
+        is_area_action_cache[action_id] = action_sheet.GetRow(action_id).TargetArea
+    if is_area_action_cache[action_id]:
+        actor = api.XivMemory.actor_table.get_actor_by_id(target_id) if target_id != 0xe0000000 else get_me()
+        if actor is not None:
+            api.Magic.do_action.do_action_location(1, action_id, actor.pos.x, actor.pos.y, actor.pos.z, actor.id)
+    else:
+        api.XivMemory.combat_data.skill_queue.use_skill(action_id, target_id)
 
 
 class XivCombat(PluginBase):
@@ -58,6 +66,7 @@ class XivCombat(PluginBase):
         api.Magic.echo_msg(self.get_status_string())
 
     def _onunload(self):
+        self.work = False
         api.command.unregister(command)
 
     def _start(self):
@@ -71,6 +80,8 @@ class XivCombat(PluginBase):
                         round_data = LogicData.LogicData(self.state, self.nSkill[0], self.nAbility[0])
                     except LogicData.NoMeActorException:
                         next_period = 0.5
+                        raise ContinueException()
+                    except LogicData.ActorDeadException:
                         raise ContinueException()
                     except LogicData.TargetNotExistsException:
                         pass
@@ -136,6 +147,8 @@ class XivCombat(PluginBase):
                     target = get_target()
                 elif args[2] == "mo":
                     target = get_mo_target()
+                elif args[2] == "me":
+                    target = get_me()
                 else:
                     return "unknown args: %s" % args[2]
             else:

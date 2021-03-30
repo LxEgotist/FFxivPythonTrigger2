@@ -16,6 +16,8 @@ from .LogicData import LogicData
 16466：暗黑波动
 16467：暗黑锋
 3625：嗜血
+
+3639:腐秽大地
 """
 """
 1972：血乱
@@ -31,6 +33,7 @@ def dark_knight_logic(data: LogicData):
         if not data[16472] and data.gauge.blood >= 50: return 16472
         if not data[3641]: return 3641
         if not data[3643]: return 3643
+        if not data[3639]: return 3639
         if not data[7390] and (data[16472] > 10 or data.gauge.blood >= 50): return 7390
         if not data[16466] and (data.me.currentMP >= (6000 if data.me.level >= 70 else 3000) or data.gauge.darkArt):
             return data.lv_skill(16467, (40, 16466)) if single else 16466

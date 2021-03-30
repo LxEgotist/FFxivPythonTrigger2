@@ -27,7 +27,7 @@ class LogHook(Hook):
                 api.XivMemory.set_chat_log_table(new_addr)
             else:
                 _logger.debug("chat log base address is correct")
-            self.disable()
+            self.uninstall()
         except Exception:
             _logger.error(format_exc())
         return self.original(a1, a2, a3)

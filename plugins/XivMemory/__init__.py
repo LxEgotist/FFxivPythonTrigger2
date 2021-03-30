@@ -1,6 +1,7 @@
 from FFxivPythonTrigger import PluginBase, Logger, memory, process_event
 from . import ActorTable, CombatData, PlayerInfo, Targets, AddressManager, ChatLog
 from time import sleep
+from traceback import format_exc
 
 _logger = Logger.Logger("XivMem")
 
@@ -39,7 +40,10 @@ class XivMemoryPlugin(PluginBase):
         self.work = True
         while self.work:
             events = []
-            events += ChatLog.processor.check_update()
+            try:
+                events += ChatLog.processor.check_update()
+            except Exception:
+                _logger.error(format_exc())
             for event in events:
                 process_event(event)
             sleep(0.1)

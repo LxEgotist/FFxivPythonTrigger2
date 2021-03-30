@@ -77,27 +77,20 @@ class Teleporter(PluginBase):
         self.coor_fly = read_memory(Vector, addr_fly)
 
         api.command.register(command, self.process_command)
-        self.work = False
+        api.Magic.frame_hook.register_continue_call(self.lock_action)
         self.lock_coor = None
 
     @property
     def coor_main(self):
         return self._coor_main.value
 
-    def _start(self):
-        self.work = True
-        while self.work:
-            try:
-                if self.lock_coor is not None:
-                    self.tp(*self.lock_coor)
-                else:
-                    sleep(0.1)
-            except Exception:
-                self.logger.error("error occurred:\n" + traceback.format_exc())
+    def lock_action(self):
+        if self.lock_coor is not None:
+            self.tp(*self.lock_coor)
 
     def _onunload(self):
         api.command.unregister(command)
-        self.work = False
+        api.Magic.frame_hook.work_continue_remove(self.lock_action)
 
     def tp(self, x=None, y=None, z=None):
         if self.coor_main is not None:

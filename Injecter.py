@@ -64,6 +64,7 @@ shellcode = """
 import sys
 from os import chdir
 from traceback import format_exc
+init_modules = sys.modules.copy()
 try:
     sys.path=%s
     chdir(sys.path[0])
@@ -71,6 +72,10 @@ try:
 except:
     with open("%s", "w+") as f:
         f.write(format_exc())
+finally:
+    for key in sys.modules.keys():
+        if key not in init_modules:
+            del sys.modules[key]
 """ % (
     dumps(sys.path),
     'Entrance.py',

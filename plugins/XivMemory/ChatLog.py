@@ -1,3 +1,5 @@
+from traceback import format_exc
+
 from .struct.ChatLog import ChatLogTable as ChatLogTableStruct
 from .chatLog import ChatLog, Player
 from FFxivPythonTrigger import EventBase, Logger, memory
@@ -68,7 +70,10 @@ class ChatLogProcessor(object):
                 self.msg_count = chat_log.count
             new_count = chat_log.count
             while self.msg_count < new_count:
-                ans.append(ChatLogEvent(chat_log.get(self.msg_count)))
+                try:
+                    ans.append(ChatLogEvent(chat_log.get(self.msg_count)))
+                except:
+                    _logger.error('error on parsing chat log:\n'+format_exc())
                 self.msg_count += 1
         return ans
 

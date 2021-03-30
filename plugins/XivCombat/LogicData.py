@@ -17,6 +17,8 @@ class TargetIsSelfException(Exception):
 class TargetNotExistsException(Exception):
     pass
 
+class ActorDeadException(Exception):
+    pass
 
 def is_actor_status_can_damage(actor):
     for eid,_ in actor.effects.get_items():
@@ -32,6 +34,7 @@ class LogicData(object):
         self.config = config
         self.me = api.XivMemory.actor_table.get_me()
         if self.me is None: raise NoMeActorException()
+        if not self.me.currentHP: raise ActorDeadException()
 
         self.current = api.XivMemory.targets.current
         if self.current is not None and self.current.id == self.me.id:

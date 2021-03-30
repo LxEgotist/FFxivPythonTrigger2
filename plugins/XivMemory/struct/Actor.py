@@ -21,8 +21,8 @@ class Effects(Effect * 19):
 
 Position = OffsetStruct({
     'x': (c_float, 0),
-    'y': (c_float, 4),
-    'z': (c_float, 8),
+    'z': (c_float, 4),
+    'y': (c_float, 8),
     'r': (c_float, 16)
 })
 
