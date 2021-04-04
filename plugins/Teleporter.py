@@ -1,11 +1,9 @@
-from FFxivPythonTrigger import PluginBase, api
+from FFxivPythonTrigger import PluginBase, api, frame_inject
 from FFxivPythonTrigger.AddressManager import AddressManager
 from FFxivPythonTrigger.memory import scan_address, read_memory
 from FFxivPythonTrigger.memory.StructFactory import PointerStruct, OffsetStruct
 from ctypes import c_float
 import math
-import traceback
-from time import sleep
 
 """
 tele~port~er~~~
@@ -77,7 +75,7 @@ class Teleporter(PluginBase):
         self.coor_fly = read_memory(Vector, addr_fly)
 
         api.command.register(command, self.process_command)
-        api.Magic.frame_hook.register_continue_call(self.lock_action)
+        frame_inject.register_continue_call(self.lock_action)
         self.lock_coor = None
 
     @property
@@ -90,7 +88,7 @@ class Teleporter(PluginBase):
 
     def _onunload(self):
         api.command.unregister(command)
-        api.Magic.frame_hook.work_continue_remove(self.lock_action)
+        frame_inject.unregister_continue_call(self.lock_action)
 
     def tp(self, x=None, y=None, z=None):
         if self.coor_main is not None:

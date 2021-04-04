@@ -1,5 +1,5 @@
 from FFxivPythonTrigger.Logger import Logger
-from .FrameInject import register_once_call
+from FFxivPythonTrigger import frame_inject
 from .AddressManager import do_action_func_addr, action_manager_addr, do_action_location_addr
 from ctypes import *
 _logger = Logger()
@@ -10,7 +10,7 @@ _do_action_location_func = CFUNCTYPE(c_char, c_int64, c_uint, c_uint, c_int64, c
 
 
 def do_action(action_type, action_id, target_id=0xE0000000, unk1=0, unk2=0, unk3=0):
-    register_once_call(_do_action_func, action_manager_addr, action_type, action_id, target_id, unk1, unk2, unk3)
+    frame_inject.register_once_call(_do_action_func, action_manager_addr, action_type, action_id, target_id, unk1, unk2, unk3)
     # return _do_action_func(action_sub_addr, action_type, action_id, target_id, unk1, unk2, unk3)
 
 
@@ -24,7 +24,7 @@ def _do_action_location(action_type, action_id, x: float, y: float, z: float, ta
 
 
 def do_action_location(action_type, action_id, x: float, y: float, z: float, target_id=0xE0000000):
-    register_once_call(_do_action_location, action_type, action_id, x, y, z, target_id)
+    frame_inject.register_once_call(_do_action_location, action_type, action_id, x, y, z, target_id)
 
 
 def use_skill(skill_id, target_id=0xE0000000):

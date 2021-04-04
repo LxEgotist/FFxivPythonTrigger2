@@ -1,7 +1,7 @@
+from FFxivPythonTrigger import frame_inject
 from FFxivPythonTrigger.memory import *
 from FFxivPythonTrigger.memory.StructFactory import OffsetStruct, PointerStruct
 from .AddressManager import do_text_command_addr, text_command_ui_module_ptr_addr
-from .FrameInject import register_once_call
 from threading import Lock
 
 _lock = Lock()
@@ -27,4 +27,4 @@ def _do_text_command(command: str) -> int:
 
 
 def do_text_command(command: str):
-    register_once_call(_do_text_command, command)
+    frame_inject.register_once_call(_do_text_command, command)

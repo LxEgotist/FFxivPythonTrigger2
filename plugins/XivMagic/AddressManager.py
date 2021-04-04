@@ -28,10 +28,4 @@ do_action_location_addr = _am.get("do action location", scan_pattern,do_action_l
 action_manager_sig = "48 8D 0D ? ? ? ? E8 ? ? ? ? 8B F8 8B CF"
 action_manager_addr = _am.get("do action ui module", scan_address, action_manager_sig, cmd_len=7)
 
-##########
-# frame inject
-##########
-frame_inject_sig = "4C 8B DC 53 56 48 81 EC 18 02 00 00 48 8B 05"
-frame_inject_addr = _am.get("frame inject",scan_pattern,frame_inject_sig)
-
 _storage.save()

@@ -7,7 +7,7 @@ import atexit
 from pathlib import Path
 from importlib import import_module
 
-from . import AttrContainer, Storage, Logger
+from . import AttrContainer, Storage, Logger, FrameInject, Sigs, AddressManager
 from .memory import PROCESS_FILENAME
 
 
@@ -149,6 +149,10 @@ def unregister_event(event_id: any, callback: EventCallback):
 
 
 def process_event(event: EventBase):
+    frame_inject.register_once_call(_process_event, event)
+
+
+def _process_event(event: EventBase):
     # _logger.debug("process event [%s]"%event.id)
     if event.id in _events:
         for callback in _events.get(event.id).copy():
@@ -170,6 +174,7 @@ def close():
     for name in reversed(list(_plugins.keys())):
         unload_plugin(name)
     _storage.save()
+    if frame_inject is not None: frame_inject.uninstall()
 
 
 def append_missions(mission: Mission, guard=True):
@@ -219,9 +224,16 @@ _plugins: Dict[str, PluginBase] = dict()
 _missions: List[Mission] = list()
 _events: Dict[any, Set[EventCallback]] = dict()
 _allow_create_missions: bool = True
+_am = AddressManager.AddressManager(_storage.data.setdefault('address', dict()), _logger)
+
+FFxiv_Version: str
+frame_inject: FrameInject.FrameInjectHook
 
 try:
     with open(Path(PROCESS_FILENAME).parent / "ffxivgame.ver") as fi:
         FFxiv_Version = fi.read()
+    frame_inject = FrameInject.FrameInjectHook(_am.get("frame_inject", **Sigs.frame_inject))
+    frame_inject.enable()
+    _storage.save()
 except FileNotFoundError:
-    FFxiv_Version = None
+    pass
