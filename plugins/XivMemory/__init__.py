@@ -1,7 +1,5 @@
-from FFxivPythonTrigger import PluginBase, Logger, memory, process_event
-from . import ActorTable, CombatData, PlayerInfo, Targets, AddressManager, ChatLog
-from time import sleep
-from traceback import format_exc
+from FFxivPythonTrigger import PluginBase, Logger, memory
+from . import ActorTable, CombatData, PlayerInfo, Targets, AddressManager
 
 _logger = Logger.Logger("XivMem")
 
@@ -11,13 +9,6 @@ class XivMemory(object):
     combat_data = CombatData.combat_data
     player_info = PlayerInfo.player_info
     targets = Targets.targets
-
-    @property
-    def chat_log(self):
-        return ChatLog.chat_log
-
-    def set_chat_log_table(self, address: int):
-        ChatLog.chat_log = memory.read_memory(ChatLog.ChatLogTable, address)
 
     @property
     def zone_id(self):
@@ -35,15 +26,3 @@ class XivMemoryPlugin(PluginBase):
 
     def _onunload(self):
         self.work = False
-
-    def _start(self):
-        self.work = True
-        while self.work:
-            events = []
-            try:
-                events += ChatLog.processor.check_update()
-            except Exception:
-                _logger.error(format_exc())
-            for event in events:
-                process_event(event)
-            sleep(0.1)

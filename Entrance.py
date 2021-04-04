@@ -11,12 +11,29 @@ try:
     register_module("SocketLogger")
 
     # core
-    register_modules(["HttpApi", "XivMemory", "XivMagic", "Command", "LogHookFix"])
+    register_modules([
+        "HttpApi",
+        "ChatLog",
+        "XivMemory",
+        "XivMagic",
+        "Command",
+    ])
 
     # functions
-    register_modules(["CutsceneSkipper", "SuperJump", "Zoom", "Teleporter", "XivCombo"])
+    register_modules([
+        "CutsceneSkipper",
+        "SuperJump",
+        "Zoom",
+        "Teleporter",
+        "XivCombo"
+    ])
 
-    register_modules(["SpeedHack", "DebugExec", "SkillAniUnlocker", "XivCombat"])
+    register_modules([
+        "SpeedHack",
+        "DebugExec",
+        "SkillAniUnlocker",
+        "XivCombat"
+    ])
     start()
 except Exception:
     pass

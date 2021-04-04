@@ -2,7 +2,7 @@ from .ChatLog import ChatLog, Player
 from FFxivPythonTrigger import EventBase, PluginBase, api, process_event
 from FFxivPythonTrigger.memory.StructFactory import OffsetStruct
 from FFxivPythonTrigger.hook import Hook
-from FFxivPythonTrigger.memory import scan_pattern, read_memory
+from FFxivPythonTrigger.memory import scan_pattern, read_memory, read_ubytes
 from FFxivPythonTrigger.AddressManager import AddressManager
 from ctypes import *
 from datetime import datetime
@@ -31,8 +31,8 @@ class ChatLogTable(OffsetStruct({
 
 
 class ChatLogEvent(EventBase):
-    id = "log_event2"
-    name = "log event2"
+    id = "log_event"
+    name = "log event"
 
     def __init__(self, chat_log: ChatLog):
         self.time = datetime.fromtimestamp(chat_log.time)
@@ -59,8 +59,8 @@ class ChatLogEvent(EventBase):
 
 
 class LogHook(Hook):
-    restype = c_uint
-    argtypes = [c_int64, c_char_p, c_int]
+    restype = c_int64
+    argtypes = [c_int64, c_int64, c_int]
 
     def __init__(self, func_address: int, addr_recall: callable):
         super().__init__(func_address)
@@ -69,19 +69,19 @@ class LogHook(Hook):
     def hook_function(self, a1, buffer, size):
         try:
             self.addr_recall(a1 - 72)
-            process_event(ChatLogEvent(ChatLog(buffer[:size])))
+            process_event(ChatLogEvent(ChatLog(read_ubytes(buffer,size))))
         except Exception:
             _logger.error(format_exc())
-            self.disable()
+            # self.disable()
         return self.original(a1, buffer, size)
 
 
 class _ApiClass(object):
-    chat_log: ChatLogTable
+    chat_log: ChatLogTable = None
 
 
 class ChatLogPlugin(PluginBase):
-    name = "log hook fix"
+    name = "chat log"
 
     def __init__(self):
         global _logger
@@ -93,11 +93,13 @@ class ChatLogPlugin(PluginBase):
         self.hook = LogHook(addr, self.check_addr)
         self.api_class = _ApiClass()
         self.register_api('ChatLog', self.api_class)
-        self.hook.enable()
 
     def check_addr(self, addr):
         if self.api_class.chat_log is None:
             self.api_class.chat_log = read_memory(ChatLogTable, addr)
+
+    def _start(self):
+        self.hook.enable()
 
     def _onunload(self):
         self.hook.uninstall()
