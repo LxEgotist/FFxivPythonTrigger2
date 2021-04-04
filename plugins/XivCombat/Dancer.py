@@ -35,6 +35,13 @@ def step_to_skill(step):
     return 15998 + step if step > 0 else 15999
 
 
+def dancer_common(data: LogicData):
+    if 1818 in data.effects and data.gcd < 0.3 and data.gauge.currentStep < 2:
+        return step_to_skill(data.gauge.step[data.gauge.currentStep])
+    elif 1819 in data.effects and data.gcd < 0.3 and data.gauge.currentStep < 4:
+        return step_to_skill(data.gauge.step[data.gauge.currentStep])
+
+
 def dancer_logic(data: LogicData):
     if 1818 in data.effects:
         if data.gcd < 0.3:
@@ -73,7 +80,7 @@ def dancer_logic(data: LogicData):
                 if e in data.effects and data.effects[e].timer < 3: return e + 14177
             for e in {1817, 1816}:
                 if e in data.effects and data.effects[e].timer < 3: return e + 14179
-            if not data[15997] and (data.is_violent or data[15998] > 5):
+            if not data[15997] and data[15998] > 5 and (data.is_violent or data.effects[1821].timer < 5):
                 return 15997
             if data.is_violent and data.gauge.esprit >= 50 and 1822 in data.effects:
                 return 16005
@@ -105,3 +112,4 @@ def dancer_logic(data: LogicData):
 
 
 fight_strategies = {38: dancer_logic}
+common_strategies = {38:dancer_common}

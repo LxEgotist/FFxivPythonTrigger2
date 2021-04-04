@@ -19,6 +19,7 @@ fight_strategies |= DarkKnight.fight_strategies
 fight_strategies |= Warrior.fight_strategies
 fight_strategies |= Dancer.fight_strategies
 
+common_strategies |= Dancer.common_strategies
 
 class ContinueException(Exception):
     pass
