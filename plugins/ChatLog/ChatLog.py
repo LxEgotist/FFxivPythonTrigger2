@@ -314,14 +314,15 @@ def group_message_chain(message_chain):
             skip = True
         if isinstance(msg, UIForeground) or isinstance(msg, UIGlow):
             continue
-        if isinstance(msg, TextMessage) and \
-                len(messages) > 1 and \
-                isinstance(messages[-1], Icon) and \
-                messages[-1].icon_id == 88 and \
-                isinstance(messages[-2], Player):
-            new_text = msg.text().lstrip(get_world_name(messages[-2].serverId))
-            msg = TextMessage.serialize(new_text)
-            messages.pop()
+        # if isinstance(msg, TextMessage) and \
+        #         len(messages) > 1 and \
+        #         isinstance(messages[-1], Icon) and \
+        #         messages[-1].icon_id == 88 and \
+        #         isinstance(messages[-2], Player):
+        #     n1,n2=get_world_name(messages[-2].serverId)
+        #     new_text = msg.text().lstrip(n2 if n2 else n1)
+        #     msg = TextMessage.serialize(new_text)
+        #     messages.pop()
         messages.append(msg)
     return messages
 

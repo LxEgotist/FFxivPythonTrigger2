@@ -103,10 +103,10 @@ class Teleporter(PluginBase):
                 self.coor_fly.z = z
 
     def tp_rxy(self, angle, dis):
-        self.tp(x=self.coor_main.x + (math.sin(angle) * dis), y=self.coor_main.y + (math.cos(angle) * dis))
+        frame_inject.register_once_call(self.tp, x=self.coor_main.x + (math.sin(angle) * dis), y=self.coor_main.y + (math.cos(angle) * dis))
 
     def tp_rz(self, dis):
-        self.tp(z=self.coor_main.z + dis)
+        frame_inject.register_once_call(self.tp, z=self.coor_main.z + dis)
 
     def get_zone_data(self):
         zid = api.XivMemory.zone_id
@@ -143,13 +143,13 @@ class Teleporter(PluginBase):
             dis = math.sqrt((data[args[1]][0] - self.coor_main.x) ** 2 + (data[args[1]][1] - self.coor_main.y) ** 2)
             if dis >= 15:
                 return "target point is %.2f meters far, teleport to target is a dangerous operation,please use 'force-goto'" % dis
-            self.tp(*data[args[1]])
+            frame_inject.register_once_call(self.tp, *data[args[1]])
             return "success"
-        elif a1 == "force-goto":
+        elif a1 == "force-goto" or a1 == "fgoto":
             zid, data = self.get_zone_data()
             if args[1] not in data:
-                return "key [%s] is not in zone [%s]" % (zid, args[1])
-            self.tp(*data[args[1]])
+                return "key [%s] is not in zone [%s]" % (args[1], zid)
+            frame_inject.register_once_call(self.tp, *data[args[1]])
             return "success"
         elif a1 == "drop":
             zid, data = self.get_zone_data()

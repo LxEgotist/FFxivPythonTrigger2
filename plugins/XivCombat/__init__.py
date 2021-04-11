@@ -21,6 +21,7 @@ fight_strategies |= Dancer.fight_strategies
 
 common_strategies |= Dancer.common_strategies
 
+
 class ContinueException(Exception):
     pass
 
@@ -122,13 +123,11 @@ class XivCombat(PluginBase):
             sleep(next_period)
 
     def get_status_string(self):
-        if self.state['use']:
-            s = "Auto Combat is active in %s mode." % ("Single" if self.state['single'] else "Multi")
-            if self.state['violent']: s += " [violent]"
-            if self.state['find']: s += " [find]"
-            return s
-        else:
-            return "AutoCombat is inactive."
+        s = "[active]" if self.state['use'] else "[inactive]"
+        s += "[single]" if self.state['single'] else "[multi]"
+        if self.state['violent']: s += " [violent]"
+        if self.state['find']: s += " [find]"
+        return s
 
     def queue_skill_command(self, args):
         sid = int(args[1])

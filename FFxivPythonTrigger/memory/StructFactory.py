@@ -1,5 +1,5 @@
 from ctypes import *
-from typing import Type, List, Tuple, Dict, Callable
+from typing import Type, List, Tuple, Dict
 from . import read_pointer_shift, memory
 
 

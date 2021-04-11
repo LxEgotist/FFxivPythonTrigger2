@@ -11,7 +11,8 @@ from . import DarkKnight, Machinist, Dancer, Gunbreaker, RedMage, Warrior
 
 combos = DarkKnight.combos | Machinist.combos | Dancer.combos | Gunbreaker.combos | RedMage.combos | Warrior.combos
 
-get_icon_sig = "48 89 ? ? ? 48 89 ? ? ? 48 89 ? ? ? 57 48 83 EC ? 8B DA BE"
+# get_icon_sig = "48 89 ? ? ? 48 89 ? ? ? 48 89 ? ? ? 57 48 83 EC ? 8B DA BE" #cn.5.35
+get_icon_sig = "48 89 ? ? ? 48 89 ? ? ? 57 48 83 EC ? 8B DA BE"  # cn.5.40
 is_icon_replaceable_sig = "81 F9 ?? ?? ?? ?? 7F 39 81 F9 ?? ?? ?? ??"
 _logger: Logger
 
