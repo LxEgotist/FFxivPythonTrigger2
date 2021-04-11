@@ -21,11 +21,12 @@ try:
 
     # functions
     register_modules([
-        "CutsceneSkipper",
-        "SuperJump",
+        # "CutsceneSkipper",
+        # "SuperJump",
         "Zoom",
         "Teleporter",
-        "XivCombo"
+        "XivCombo",
+        "ACTLogLines",
     ])
 
     register_modules([
