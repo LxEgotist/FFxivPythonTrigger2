@@ -27,6 +27,7 @@ try:
         "Teleporter",
         "XivCombo",
         "ACTLogLines",
+        "SendKeys"
     ])
 
     register_modules([
