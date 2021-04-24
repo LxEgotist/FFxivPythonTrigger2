@@ -21,13 +21,14 @@ endl = "\n<press enter to exit>"
 
 name = "ffxiv_dx11.exe"
 pid = None
-for p in process.list_processes():
-    if name in p.szExeFile.decode(locale.getpreferredencoding()).lower():
-        pid = p.th32ProcessID
-        break
-if pid is None:
-    input("game process not found, please run the game first" + endl)
-    exit()
+print("start searching for game process...")
+while pid is None:
+    for p in process.list_processes():
+        if name in p.szExeFile.decode(locale.getpreferredencoding()).lower():
+            pid = p.th32ProcessID
+            break
+    time.sleep(1)
+print("game process pid: %s" % pid)
 
 handler = kernel32.OpenProcess(structure.PROCESS.PROCESS_ALL_ACCESS.value, False, pid)
 if not handler:

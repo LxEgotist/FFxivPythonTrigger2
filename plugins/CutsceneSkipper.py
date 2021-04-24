@@ -15,7 +15,7 @@ command = "@cutscene"
 
 _logger = Logger("CutsceneSkipper")
 _storage = get_module_storage("CutsceneSkipper")
-sig = "8b d7 48 8b 08 4c 8b 01"
+sig = "75 33 48 8B 0D ?? ?? ?? ?? BA ?? 00 00 00 48 83 C1 10 E8 ?? ?? ?? ?? 83 78"
 addr = AddressManager(_storage.data, _logger).get("addr", scan_pattern, sig)
 _storage.save()
 
@@ -23,8 +23,8 @@ _ver_storage = _storage.data[FFxiv_Version]
 
 _code = read_memory(
     StructFactory.OffsetStruct({
-        "mark1": (c_ubyte * 2, 0x11),
-        "mark2": (c_ubyte * 2, 0x2c)
+        "mark1": (c_ubyte * 2,0),
+        "mark2": (c_ubyte * 2, 0x1b)
     }), addr)
 
 

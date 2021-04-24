@@ -21,7 +21,7 @@ try:
 
     # functions
     register_modules([
-        # "CutsceneSkipper",
+        "CutsceneSkipper",
         "SuperJump",
         "ActorQuery",
         "Zoom",
