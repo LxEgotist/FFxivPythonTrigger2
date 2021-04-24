@@ -65,9 +65,12 @@ class Actor(OffsetStruct({
     "CastingProgress": (c_uint,7060),
     "CastingTime": (c_float,7064),
 })):
+
     @property
-    def decoded_name(self):
+    def Name(self):
         return self.name.decode('utf-8', errors='ignore')
+
+    decoded_name = Name
 
     @property
     def can_select(self):

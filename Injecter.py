@@ -99,12 +99,15 @@ while True:
         time.sleep(1)
 print("connect!")
 while True:
-    size = int.from_bytes(sock.recv(4), 'little', signed=True)
-    if size < 0:
-        print('end')
-        sock.close()
-        time.sleep(2)
+    try:
+        size = int.from_bytes(sock.recv(4), 'little', signed=True)
+        if size < 0:
+            print('end')
+            sock.close()
+            time.sleep(2)
+            break
+        else:
+            print(sock.recv(size).decode('utf-8'))
+    except:
         break
-    else:
-        print(sock.recv(size).decode('utf-8'))
 process.start_thread(funcs[b'Py_FinalizeEx'], handler=handler)

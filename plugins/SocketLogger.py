@@ -56,6 +56,7 @@ class SocketLogger(PluginBase):
         host = self.server_config.setdefault('host', default_host)
         port = self.server_config.setdefault('port', default_port)
         self.server = socketserver.ThreadingTCPServer((host, port), TcpServer)
+        self.server.allow_reuse_address = True
         self.create_mission(self.server.serve_forever)
 
     def _onunload(self):

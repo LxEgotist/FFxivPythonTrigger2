@@ -56,7 +56,7 @@ def gunbreaker_logic(data: LogicData):
                 return
             else:
                 return data.lv_skill(16143, (15, None))
-        if data.is_violent and not data[16146] and (data[16138] > 5 or 1831 in data.effects) and data.gauge.cartridges:
+        if data.is_violent and not data[16146] and (data[16138] > 5 or 1831 in data.effects) and data.gauge.cartridges and data.is_single(dis=5,limit=4):
             return 16146
         if not data[16153] and 1831 in data.effects:
             return 16153

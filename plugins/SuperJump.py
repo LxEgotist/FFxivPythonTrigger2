@@ -1,8 +1,8 @@
-from FFxivPythonTrigger.memory import scan_address, write_float,read_float
+from FFxivPythonTrigger.memory import scan_pattern, write_float,read_float
 from FFxivPythonTrigger.Logger import Logger
 from FFxivPythonTrigger.Storage import get_module_storage
 from FFxivPythonTrigger.AddressManager import AddressManager
-from FFxivPythonTrigger import FFxiv_Version, PluginBase, api
+from FFxivPythonTrigger import PluginBase, api
 
 """
 change the jump value to let you jump higher -- or lower
@@ -18,15 +18,14 @@ command = "@sjump"
 
 _logger = Logger("SuperJump")
 _storage = get_module_storage("SuperJump")
-sig = "f3 0f 10 35 ?? ?? ?? ?? 48 85 c0 74 ?? 48 8b 88 ?? ?? ?? ?? 48 85 c9 75 ?? 32 c0 eb ?? f6 05 ?? ?? ?? ?? ?? 75 ?? 33 d2 e8 ?? ?? ?? ?? f6 d8 " \
-    "0f 28 d6 48 8b cb 1b d2 83 c2 ?? 0f 28 74 24 ?? 48 83 c4 ?? 5b e9 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 40 53 "
-addr = AddressManager(_storage.data, _logger).get("addr", scan_address, sig,cmd_len=8)
+sig = "66 66 26 41"
+addr = AddressManager(_storage.data, _logger).get("addr", scan_pattern, sig)
 _storage.save()
 
 default = 10.4
 
-class CutsceneSkipper(PluginBase):
-    name = "Cutscene Skipper"
+class SuperJump(PluginBase):
+    name = "Super Jumper"
 
     def __init__(self):
         super().__init__()

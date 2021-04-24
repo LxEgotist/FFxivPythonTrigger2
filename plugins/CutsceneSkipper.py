@@ -54,9 +54,9 @@ def dispatch():
 
     return "dispatch success"
 
+class CutsceneSkipper(PluginBase):
+    name = "Cutscene Skipper"
 
-class SuperJump(PluginBase):
-    name = "Super Jumper"
 
     def __init__(self):
         super().__init__()

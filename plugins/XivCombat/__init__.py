@@ -1,7 +1,7 @@
-from FFxivPythonTrigger import PluginBase, api, lumina
+from FFxivPythonTrigger import PluginBase, api, lumina, frame_inject
 from Lumina.Excel.GeneratedSheets import Action
 from traceback import format_exc
-from time import sleep
+from time import perf_counter
 from . import LogicData
 
 action_sheet = lumina.lumina.GetExcelSheet[Action]()
@@ -64,17 +64,19 @@ class XivCombat(PluginBase):
         self.nAbility = [None, 0]
         self.nSkill = [None, 0]
         api.command.register(command, self.process_command)
+        frame_inject.register_continue_call(self.action)
+        self.next_work_time = 0
+        self.count_error = 0
 
         api.Magic.echo_msg(self.get_status_string())
 
     def _onunload(self):
         self.work = False
         api.command.unregister(command)
+        frame_inject.unregister_continue_call(self.action)
 
-    def _start(self):
-        self.work = True
-        count_error = 0
-        while self.work:
+    def action(self):
+        if self.work and perf_counter() > self.next_work_time:
             next_period = 0.1
             try:
                 if self.state['use']:
@@ -110,17 +112,19 @@ class XivCombat(PluginBase):
                     use_skill(*self.nAbility[0])
                     self.nAbility = [None, 0]
             except ContinueException:
-                count_error = 0
+                self.count_error = 0
             except Exception:
                 self.logger.error("error occurred:\n" + format_exc())
-                count_error += 1
-                if count_error >= 20:
+                self.count_error += 1
+                if self.count_error >= 20:
                     self.logger.error("end because too many error occurred")
                     self.work = False
-                    break
             else:
-                count_error = 0
-            sleep(next_period)
+                self.count_error = 0
+            self.next_work_time = perf_counter() + next_period
+
+    def _start(self):
+        self.work = True
 
     def get_status_string(self):
         s = "[active]" if self.state['use'] else "[inactive]"
