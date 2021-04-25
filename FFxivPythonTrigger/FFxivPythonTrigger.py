@@ -129,7 +129,8 @@ def reload_module(module):
     for sub_module in list(sys.modules.keys()):
         if sub_module.startswith(module_name):
             reload(import_module(sub_module))
-    register_module(import_module(module_name))
+    for plugin in register_module(import_module(module_name)):
+        plugin.p_start()
 
 
 def register_plugin(plugin: Type[PluginBase]) -> PluginBase:

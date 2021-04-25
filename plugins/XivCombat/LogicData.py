@@ -84,10 +84,10 @@ class LogicData(object):
     def skill_cd(self, action_id: int):
         if action_id not in self.skill_cd_cache:
             row = action_sheet[action_id]
-            if self.me.level < row.ClassJobLevel:
+            if self.me.level < row['ClassJobLevel']:
                 self.skill_cd_cache[action_id] = 9999
             else:
-                self.skill_cd_cache[action_id] = api.XivMemory.combat_data.cool_down_group[row.CooldownGroup].remain
+                self.skill_cd_cache[action_id] = api.XivMemory.combat_data.cool_down_group[row['CooldownGroup']].remain
         return self.skill_cd_cache[action_id]
 
     def lv_skill(self, base_id, *statements):
