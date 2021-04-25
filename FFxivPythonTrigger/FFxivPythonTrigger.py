@@ -1,10 +1,11 @@
+import sys
 from threading import Lock, Thread
 from time import time
 from traceback import format_exc
 from typing import List, Type, Dict, Set
 from inspect import isclass
 import atexit
-from importlib import import_module
+from importlib import import_module, reload
 
 from . import AttrContainer, Storage, Logger, FrameInject, Sigs, AddressManager
 
@@ -117,6 +118,20 @@ def register_module(module) -> List[PluginBase]:
     return installed
 
 
+def reload_module(module):
+    if type(module) == str:
+        module = import_module("plugins.%s" % module)
+    module_name = module.__name__
+    for attr_name in dir(module):
+        attr = getattr(module, attr_name)
+        if isclass(attr) and issubclass(attr, PluginBase) and attr != PluginBase:
+            unload_plugin(attr.name)
+    for sub_module in list(sys.modules.keys()):
+        if sub_module.startswith(module_name):
+            reload(import_module(sub_module))
+    register_module(import_module(module_name))
+
+
 def register_plugin(plugin: Type[PluginBase]) -> PluginBase:
     if plugin.name in _plugins:
         raise Exception("Plugin %s was already registered" % plugin.name)
@@ -223,7 +238,7 @@ _missions: List[Mission] = list()
 _events: Dict[any, Set[EventCallback]] = dict()
 _allow_create_missions: bool = True
 
-_am:AddressManager.AddressManager
+_am: AddressManager.AddressManager
 FFxiv_Version: str
 frame_inject: FrameInject.FrameInjectHook
 

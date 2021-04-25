@@ -1,9 +1,12 @@
 from FFxivPythonTrigger.memory.StructFactory import OffsetStruct
 from ctypes import *
-from FFxivPythonTrigger.lumina import lumina
-from Lumina.Excel.GeneratedSheets import Action
+# from FFxivPythonTrigger.lumina import lumina
+# from Lumina.Excel.GeneratedSheets import Action
+#
+# action_sheet = lumina.GetExcelSheet[Action]()
 
-action_sheet = lumina.GetExcelSheet[Action]()
+from FFxivPythonTrigger.SaintCoinach import realm
+action_sheet = realm.game_data.get_sheet('Action')
 
 ComboState = OffsetStruct({
     'remain': (c_float, 0),
@@ -23,7 +26,7 @@ class CoolDownGroup(OffsetStruct({
 class CoolDownGroups(CoolDownGroup * 100):
 
     def by_skill(self, skill_id: int):
-        return self[action_sheet.GetRow(skill_id).CooldownGroup]
+        return self[action_sheet[skill_id]['CooldownGroup']]
 
     @property
     def gcd_group(self):

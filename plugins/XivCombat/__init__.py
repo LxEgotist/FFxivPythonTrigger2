@@ -1,10 +1,11 @@
-from FFxivPythonTrigger import PluginBase, api, lumina, frame_inject
-from Lumina.Excel.GeneratedSheets import Action
+from FFxivPythonTrigger import PluginBase, api, frame_inject,SaintCoinach
+# from Lumina.Excel.GeneratedSheets import Action
 from traceback import format_exc
 from time import perf_counter
 from . import LogicData
 
-action_sheet = lumina.lumina.GetExcelSheet[Action]()
+# action_sheet = lumina.lumina.GetExcelSheet[Action]()
+action_sheet = SaintCoinach.realm.game_data.get_sheet('Action')
 command = "@aCombat"
 
 fight_strategies = dict()
@@ -40,7 +41,7 @@ def get_mo_target():
 
 def use_skill(action_id, target_id=0xe0000000):
     if action_id not in is_area_action_cache:
-        is_area_action_cache[action_id] = action_sheet.GetRow(action_id).TargetArea
+        is_area_action_cache[action_id] = action_sheet[action_id]['TargetArea']
     if is_area_action_cache[action_id]:
         actor = api.XivMemory.actor_table.get_actor_by_id(target_id) if target_id != 0xe0000000 else get_me()
         if actor is not None:
@@ -180,7 +181,7 @@ class XivCombat(PluginBase):
         return "next {} - name: {} / target: {}".format("skill" if is_skill else "ability", self.get_action_name(sid), target.decoded_name)
 
     def get_action_name(self, action_id):
-        return action_sheet.GetRow(action_id).Name
+        return action_sheet[action_id]['Name']
 
     def process_command(self, args):
         if args[0] == "q":

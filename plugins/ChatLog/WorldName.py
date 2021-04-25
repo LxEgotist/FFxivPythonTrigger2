@@ -1,7 +1,11 @@
-from FFxivPythonTrigger.lumina import lumina
-from Lumina.Excel.GeneratedSheets import World
+# from FFxivPythonTrigger.lumina import lumina
+# from Lumina.Excel.GeneratedSheets import World
+#
+# world_sheet = lumina.GetExcelSheet[World]()
 
-world_sheet = lumina.GetExcelSheet[World]()
+from FFxivPythonTrigger.SaintCoinach import realm
+world_sheet = realm.game_data.get_sheet('World')
+
 name_cache = dict()
 translate = {
     'HuPoYuan': '琥珀原',
@@ -13,5 +17,5 @@ translate = {
 
 def get_world_name(world_id: int):
     if world_id not in name_cache:
-        name_cache[world_id] = world_sheet.GetRow(world_id).Name
+        name_cache[world_id] = world_sheet[world_id]['Name']
     return name_cache[world_id], translate.get(name_cache[world_id])

@@ -1,7 +1,7 @@
-from FFxivPythonTrigger import api, Utils, lumina
-from Lumina.Excel.GeneratedSheets import Action
-
-action_sheet = lumina.lumina.GetExcelSheet[Action]()
+from FFxivPythonTrigger import api, Utils, SaintCoinach
+#from Lumina.Excel.GeneratedSheets import Action
+action_sheet = SaintCoinach.realm.game_data.get_sheet('Action')
+#action_sheet = lumina.lumina.GetExcelSheet[Action]()
 
 invincible_effects = {325, 394, 529, 656, 671, 775, 776, 895, 969, 981, 1570, 1697, 1829, }
 
@@ -83,7 +83,7 @@ class LogicData(object):
 
     def skill_cd(self, action_id: int):
         if action_id not in self.skill_cd_cache:
-            row = action_sheet.GetRow(action_id)
+            row = action_sheet[action_id]
             if self.me.level < row.ClassJobLevel:
                 self.skill_cd_cache[action_id] = 9999
             else:

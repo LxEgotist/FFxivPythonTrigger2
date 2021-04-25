@@ -1,7 +1,9 @@
 >以上略
 
-> 装不了pythonnet可以试试
+> 以下内容更新后没意义了（
 > 
+> 装不了pythonnet可以试试
+>
 > ```
 > pip install -U setuptools
 > pip install -U wheel
