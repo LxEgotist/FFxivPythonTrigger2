@@ -25,6 +25,8 @@ def FptManager(args):
         close()
     elif args[0] == 'raise':
         raise Exception("111aw")
+    elif args[0] == 'unload':
+        unload_module(args[1])
     elif args[0] == 'reload':
         reload_module(args[1])
     elif args[0] == 'log':

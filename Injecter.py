@@ -29,7 +29,7 @@ while pid is None:
             break
     time.sleep(1)
 print("game process pid: %s" % pid)
-
+time.sleep(3)
 handler = kernel32.OpenProcess(structure.PROCESS.PROCESS_ALL_ACCESS.value, False, pid)
 if not handler:
     input("could not open process" + endl)

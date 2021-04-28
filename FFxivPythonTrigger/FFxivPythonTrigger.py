@@ -118,14 +118,20 @@ def register_module(module) -> List[PluginBase]:
     return installed
 
 
-def reload_module(module):
+def unload_module(module):
     if type(module) == str:
         module = import_module("plugins.%s" % module)
-    module_name = module.__name__
     for attr_name in dir(module):
         attr = getattr(module, attr_name)
         if isclass(attr) and issubclass(attr, PluginBase) and attr != PluginBase:
             unload_plugin(attr.name)
+
+
+def reload_module(module):
+    if type(module) == str:
+        module = import_module("plugins.%s" % module)
+    unload_module(module)
+    module_name = module.__name__
     for sub_module in list(sys.modules.keys()):
         if sub_module.startswith(module_name):
             reload(import_module(sub_module))

@@ -59,4 +59,4 @@ def scan_static_address_module(module, regex_pattern, cmd_len: int, ptr_idx: int
     ptr_idx = ptr_idx or cmd_len - 4
     temp = scan_pattern_module(module, regex_pattern)
     if temp is None: return None
-    return memory.read_ulong(temp + ptr_idx) + temp + cmd_len
+    return memory.read_long(temp + ptr_idx) + temp + cmd_len

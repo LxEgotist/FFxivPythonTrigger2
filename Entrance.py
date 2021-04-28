@@ -21,6 +21,7 @@ try:
 
     # functions
     register_modules([
+        "MoPlus",
         "CutsceneSkipper",
         "SuperJump",
         "ActorQuery",

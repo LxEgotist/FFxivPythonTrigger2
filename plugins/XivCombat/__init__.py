@@ -1,7 +1,9 @@
-from FFxivPythonTrigger import PluginBase, api, frame_inject,SaintCoinach
+from FFxivPythonTrigger import PluginBase, api, frame_inject, SaintCoinach
 # from Lumina.Excel.GeneratedSheets import Action
 from traceback import format_exc
 from time import perf_counter
+
+from FFxivPythonTrigger.AttrContainer import AttributeNotFoundException
 from . import LogicData
 
 # action_sheet = lumina.lumina.GetExcelSheet[Action]()
@@ -36,7 +38,10 @@ def get_target():
 
 
 def get_mo_target():
-    return api.XivMemory.targets.mouse_over
+    try:
+        return api.MoPlus.entity
+    except AttributeNotFoundException:
+        return api.XivMemory.targets.mouse_over
 
 
 def use_skill(action_id, target_id=0xe0000000):

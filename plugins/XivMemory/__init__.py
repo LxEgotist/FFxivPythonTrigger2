@@ -1,10 +1,12 @@
 from FFxivPythonTrigger import PluginBase, Logger, memory
 from . import ActorTable, CombatData, PlayerInfo, Targets, AddressManager
+from . import struct
 
 _logger = Logger.Logger("XivMem")
 
 
 class XivMemory(object):
+    struct = struct
     actor_table = ActorTable.actor_table
     combat_data = CombatData.combat_data
     player_info = PlayerInfo.player_info
