@@ -126,8 +126,11 @@ class XivCraft(PluginBase):
                 self.solver = solver(recipe=recipe, player=player, logger=self.logger)
                 break
         if self.solver is not None:
+            self.logger.info("solver found, starting to solve...")
             ans = self.solver.process()
             if ans is not None: callback(ans)
+        else:
+            self.logger.info("no solver found, please add a solver for this recipe")
 
     def craft_next(self, chat_log, regex_result):
         sleep(0.3)
