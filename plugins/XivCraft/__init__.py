@@ -124,6 +124,7 @@ class XivCraft(PluginBase):
         for solver in registered_solvers:
             if solver.suitable(recipe=recipe, player=player):
                 self.solver = solver(recipe=recipe, player=player, logger=self.logger)
+                break
         if self.solver is not None:
             ans = self.solver.process()
             if ans is not None: callback(ans)
