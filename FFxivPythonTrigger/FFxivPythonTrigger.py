@@ -189,6 +189,10 @@ def unload_plugin(plugin_name):
         _logger.error('error occurred during unload plugin\n %s' % format_exc())
 
 
+def list_plugin_names():
+    return list(_plugins.keys())
+
+
 def close():
     _allow_create_missions = False
     for name in reversed(list(_plugins.keys())):

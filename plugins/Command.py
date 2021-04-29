@@ -29,6 +29,8 @@ def FptManager(args):
         unload_module(args[1])
     elif args[0] == 'reload':
         reload_module(args[1])
+    elif args[0]=='list':
+        api.Magic.echo_msg("\n".join(list_plugin_names()))
     elif args[0] == 'log':
         _logger.info(" ".join(args[1:]))
 

@@ -1,142 +1,151 @@
-import math
+class Recipe(object):
+    detail_format = "{name}(rlv:{rlv}) - suggest: {suggest_craft}/{suggest_control} - values: {max_difficulty}/{max_quality}/{max_durability}"
+    short_format = "{name}(rlv:{rlv})"
 
-names = {
-    'DesignChanges': '设计变动',
-    'TrainedEye': '工匠的神速技巧',
-    'IntensiveSynthesis': '集中制作',
-    'DelicateSynthesis': '精密制作',
-    'Groundwork': '坯料制作',
-    'PreparatoryTouch': '坯料加工',
-    'PatientTouch': '专心加工',
-    'FocusedTouch': '注视加工',
-    'MastersMend': '精修',
-    'WasteNot': '俭约',
-    'Veneration': '崇敬',
-    'GreatStrides': '阔步',
-    'MuscleMemory': '坚信',
-    'StandardTouch': '中级加工',
-    'RapidSynthesis': '高速制作',
-    'FocusedSynthesis': '注视制作',
-    'InnerQuiet': '内静',
-    'Reflect': '闲静',
-    'CarefulObservation': '最终确认',
-    'HastyTouch': '仓促',
-    'BasicTouch': '加工',
-    'Innovation': '改革',
-    'PrudentTouch': '俭约加工',
-    'TricksOfTheTrade': '秘诀',
-    'Observe': '观察',
-    'Manipulation': '掌握',
-    'BrandOfTheElements': '元素之印记',
-    'CarefulSynthesis': '模范制作',
-    'BasicSynthesis': '制作',
-    'NameOfTheElements': '元素之美名',
-    'ByregotsBlessing': '比尔格的祝福',
-    'PreciseTouch': '集中加工',
-    'WasteNotTwo': '长期俭约'
-}
+    def __init__(self, recipe_row):
+        self.recipe_row = recipe_row
+        self.name = recipe_row["Item{Result}"]["Name"]
+        rlv_row = recipe_row["RecipeLevelTable"]
+        self.rlv = rlv_row.key
+        self._status_flag = rlv_row["ConditionsFlag"]
+        self.suggest_craft = rlv_row["SuggestedCraftsmanship"]
+        self.suggest_control = rlv_row["SuggestedControl"]
+        self.max_difficulty = rlv_row["Difficulty"] * recipe_row["DifficultyFactor"] // 100
+        self.max_quality = rlv_row["Quality"] * recipe_row["QualityFactor"] // 100
+        self.max_durability = rlv_row["Durability"] * recipe_row["DurabilityFactor"] // 100
+
+    def status_is_available(self, status_id):
+        return bool(self._status_flag & (2 ** (status_id - 1)))
+
+    @property
+    def detail_str(self):
+        return self.detail_format.format(
+            name=self.name,
+            rlv=self.rlv,
+            suggest_craft=self.suggest_craft,
+            suggest_control=self.suggest_control,
+            max_difficulty=self.max_difficulty,
+            max_quality=self.max_quality,
+            max_durability=self.max_durability,
+        )
+
+    def __str__(self):
+        return self.short_format.format(
+            name=self.name,
+            rlv=self.rlv,
+            suggest_craft=self.suggest_craft,
+            suggest_control=self.suggest_control,
+            max_difficulty=self.max_difficulty,
+            max_quality=self.max_quality,
+            max_durability=self.max_durability,
+        )
 
 
-class SkillBase(object):
-    HIDE = False
-    KEEP_ROUND = False
+class Player(object):
+    def __init__(self, lv, craft, control, max_cp):
+        self.lv = lv
+        self.craft = craft
+        self.control = control
+        self.max_cp = max_cp
 
-    def __init__(self):
-        if not hasattr(self, "name"):
-            if type(self).__name__ in names:
-                self.name = names[type(self).__name__]
-            else:
-                self.name = type(self).__name__
+    def __str__(self):
+        return "({lv}) {craft}/{control}/{max_cp}".format(
+            lv=self.lv, craft=self.craft, control=self.control, max_cp=self.max_cp
+        )
 
-    progress = 0
-    quality = 0
-    cost = 0
-    durability = 0
 
-    def get_progress(self, status):
-        return self.progress
-
-    def get_quality(self, status):
-        return self.quality
-
-    def get_cost(self, status):
-        return self.cost
-
-    def get_durability(self, status):
-        return self.durability
+class Skill(object):
+    name = "Unknown Skill"
+    pass_rounds = True
+    _progress = 0
+    _quality = 0
+    _cost = 0
+    _durability = 0
 
     def __str__(self):
         return self.name
 
-    def after_use(self, status):
+    def __eq__(self, other):
+        return self.name == other
+
+    def progress(self, craft):
+        return self._progress
+
+    def quality(self, craft):
+        return self._quality
+
+    def cost(self, craft):
+        return self._cost
+
+    def durability(self, craft):
+        return self._durability
+
+    def after_use(self, craft):
         pass
 
-    def can_use(self, status):
-        return True
+
+class Effect(object):
+    id = -1
+    param: int
+    name = "Unknown Effect"
+    use_rounds = True
+    _progress_factor = 0
+    _quality_factor = 0
+    _durability_factor = 0
+    _cost_factor = 0
+
+    def __str__(self):
+        return "{name}({param})".format(name=self.name, param=self.param)
+
+    def __eq__(self, other):
+        return self.name == other
+
+    def __init__(self, param=0):
+        self.param = param
+
+    def progress_factor(self, craft, used_skill):
+        return self._progress_factor
+
+    def quality_factor(self, craft, used_skill):
+        return self._quality_factor
+
+    def durability_factor(self, craft, used_skill):
+        return self._durability_factor
+
+    def cost_factor(self, craft, used_skill):
+        return self._cost_factor
+
+    def after_round(self, craft, used_skill):
+        self.param -= 1
+        if not self.param and self.name in craft.effects:
+            del craft.effects[self.name]
 
 
-class BuffBase(object):
-
-    def __init__(self):
-        if not hasattr(self, "name"):
-            if type(self).__name__ in names:
-                self.name = names[type(self).__name__]
-            else:
-                self.name = type(self).__name__
+class Status(object):
+    id = -1
+    name = "Unknown Status"
+    _progress_factor = 0
+    _quality_factor = 0
+    _durability_factor = 0
+    _cost_factor = 0
 
     def __str__(self):
         return self.name
 
-    def get_progress_buff(self, action_use, container, status):
-        return self.progress
+    def __eq__(self, other):
+        return self.name == other
 
-    def get_quality_buff(self, action_use, container, status):
-        return self.quality
+    def progress_factor(self, craft, used_skill):
+        return self._progress_factor
 
-    def get_cost_buff(self, action_use, container, status):
-        return self.cost
+    def quality_factor(self, craft, used_skill):
+        return self._quality_factor
 
-    def get_durability_buff(self, action_use, container, status):
-        return self.durability
+    def durability_factor(self, craft, used_skill):
+        return self._durability_factor
 
-    progress = 0
-    quality = 0
-    cost = 0
-    durability = 0
+    def cost_factor(self, craft, used_skill):
+        return self._cost_factor
 
-    def go_next_round(self, action_use, container, status):
-        container.param -= 1
-        if container.param < 1:
-            status.remove_effect(self)
-
-
-class BallBase(object):
-    progress = 1
-    quality = 1
-    durability = 1
-    cost = 1
-
-    def get_progress(self, status):
-        return self.progress
-
-    def get_quality(self, status):
-        return self.quality
-
-    def get_cost(self, status):
-        return self.cost
-
-    def get_durability(self, status):
-        return self.durability
-
-    def __init__(self):
-        if not hasattr(self, "name"):
-            if type(self).__name__ in names:
-                self.name = names[type(self).__name__]
-            else:
-                self.name = type(self).__name__
-
-    def __str__(self):
-        return self.name
-
-    def after_use(self, action_use, status):
+    def after_round(self, craft, used_skill):
         pass

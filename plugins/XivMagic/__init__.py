@@ -4,10 +4,14 @@ from . import DoTextCommand, DoAction, AddressManager
 
 
 class Magics(object):
-    macro_command = DoTextCommand.do_text_command
+    @staticmethod
+    def macro_command(macro):
+        DoTextCommand.do_text_command(macro)
+
     do_action = DoAction
 
-    def echo_msg(self, msg):
+    @staticmethod
+    def echo_msg(msg):
         DoTextCommand.do_text_command("/e %s" % msg)
 
 
@@ -38,3 +42,7 @@ class XivMagic(PluginBase):
 
     def _start(self):
         self.api_class.echo_msg("magic started")
+
+    def _unload(self):
+        api.HttpApi.unregister_post_route('command')
+        api.HttpApi.unregister_post_route('useitem')
