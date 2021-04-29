@@ -1,13 +1,25 @@
 from ctypes import *
+from _ctypes import Array
 from typing import Type, List, Tuple, Dict
 from . import read_pointer_shift, memory
+
+
+def get_data(data):
+    if isinstance(data, _OffsetStruct):
+        return {k: get_data(v) for k, v in data.get_item()}
+    if isinstance(data, Array):
+        return [get_data(i) for i in data]
+    return data
 
 
 class _OffsetStruct(Structure):
     raw_fields: Dict[str, Tuple[any, int]] = None
 
+    def get_data(self):
+        return get_data(self)
+
     def __str__(self):
-        return str({k: v for k, v in self.get_item()})
+        return str(get_data(self))
 
     def get_item(self):
         for k in self.raw_fields.keys():
@@ -55,7 +67,7 @@ class _PointerStruct(c_void_p):
     _fields_ = [('base', c_ulonglong)]
 
     def __getattr__(self, item):
-        return getattr(self.value,item)
+        return getattr(self.value, item)
 
     @property
     def value(self):
