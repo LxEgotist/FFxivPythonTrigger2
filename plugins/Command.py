@@ -11,10 +11,15 @@ privide some basic control commands
 command:    @fpt
 format:     /e @fpt [func] [args]...
 functions (*[arg] is optional args):
+    [list]:     list installed plugins
     [close]:    shut down the FFxiv Python trigger (recommend!!!!)
     [raise]:    try to raise an exception
     [log]:      log something
                 format: /e @fpt log [message]
+    [unload]:   unload (or named as disabled) an module
+                format: /e @fpt unload [module_name]
+    [reload]:   reload (or named as load) an module
+                format: /e @fpt reload [module_name]
 """
 
 _logger = Logger.Logger("Commands")
