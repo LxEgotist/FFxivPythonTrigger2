@@ -174,7 +174,7 @@ class Status(Interactable):
 
     def __init__(self, raw_data: bytes):
         super(Status, self).__init__(raw_data)
-        self.status_id = get_integer(raw_data[4:])
+        self.status_id,_ = get_integer(raw_data[4:])
 
     def text(self): return self.status_id
 
@@ -184,7 +184,7 @@ class QuestLink(Interactable):
 
     def __init__(self, raw_data: bytes):
         super(QuestLink, self).__init__(raw_data)
-        self.quest_id = get_integer(raw_data[4:])
+        self.quest_id,_ = get_integer(raw_data[4:])
 
     def text(self): return self.quest_id
 
@@ -196,7 +196,7 @@ class DalamudLink(Interactable):
         super(DalamudLink, self).__init__(raw_data)
         length = raw_data[4]
         self.plugin = raw_data[5:length + 5].decode('utf-8')
-        self.command_id = get_integer(raw_data[length + 5:])
+        self.command_id,_ = get_integer(raw_data[length + 5:])
 
     def text(self):
         return "%s/%s" % (self.plugin, self.command_id)
