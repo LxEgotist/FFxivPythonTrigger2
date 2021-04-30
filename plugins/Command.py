@@ -22,36 +22,33 @@ functions (*[arg] is optional args):
                 format: /e @fpt reload [module_name]
 """
 
-_logger = Logger.Logger("Commands")
-
-
-def FptManager(args):
-    if args[0] == 'close':
-        close()
-    elif args[0] == 'raise':
-        raise Exception("111aw")
-    elif args[0] == 'unload':
-        unload_module(args[1])
-    elif args[0] == 'reload':
-        reload_module(args[1])
-    elif args[0]=='list':
-        api.Magic.echo_msg("\n".join(list_plugin_names()))
-    elif args[0] == 'log':
-        _logger.info(" ".join(args[1:]))
-
 
 class CommandPlugin(PluginBase):
     name = "command controller"
+
+    def FptManager(self, args):
+        if args[0] == 'close':
+            close()
+        elif args[0] == 'raise':
+            raise Exception("111aw")
+        elif args[0] == 'unload':
+            unload_module(args[1])
+        elif args[0] == 'reload':
+            reload_module(args[1])
+        elif args[0] == 'list':
+            api.Magic.echo_msg("\n".join(list_plugin_names()))
+        elif args[0] == 'log':
+            self.logger.info(" ".join(args[1:]))
 
     def deal_chat_log(self, event):
         if event.channel_id == 56:
             args = event.message.split(' ')
             if args[0] in self.commands:
-                _logger.debug(event.message)
+                self.logger.debug(event.message)
                 try:
                     self.commands[args[0]](args[1:])
                 except Exception:
-                    _logger.error('exception occurred:\n{}'.format(traceback.format_exc()))
+                    self.logger.error('exception occurred:\n{}'.format(traceback.format_exc()))
 
     def register(self, command: str, callback):
         if ' ' in command:
@@ -74,4 +71,4 @@ class CommandPlugin(PluginBase):
         self.commands = dict()
         self.register_event("log_event", self.deal_chat_log)
         self.register_api('command', CommandApi())
-        self.register('@fpt', FptManager)
+        self.register('@fpt', self.FptManager)
