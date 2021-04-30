@@ -7,7 +7,7 @@ class Recipe(object):
         self.name = recipe_row["Item{Result}"]["Name"]
         rlv_row = recipe_row["RecipeLevelTable"]
         self.rlv = rlv_row.key
-        self._status_flag = rlv_row["ConditionsFlag"]
+        self.status_flag = rlv_row["ConditionsFlag"]
         self.suggest_craft = rlv_row["SuggestedCraftsmanship"]
         self.suggest_control = rlv_row["SuggestedControl"]
         self.max_difficulty = rlv_row["Difficulty"] * recipe_row["DifficultyFactor"] // 100
@@ -15,7 +15,7 @@ class Recipe(object):
         self.max_durability = rlv_row["Durability"] * recipe_row["DurabilityFactor"] // 100
 
     def status_is_available(self, status_id):
-        return bool(self._status_flag & (2 ** (status_id - 1)))
+        return bool(self.status_flag & (2 ** (status_id - 1)))
 
     @property
     def detail_str(self):

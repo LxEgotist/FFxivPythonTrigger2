@@ -10,7 +10,7 @@ from FFxivPythonTrigger.hook import Hook
 from FFxivPythonTrigger.memory import read_ushort, scan_pattern, read_memory, scan_address
 from FFxivPythonTrigger.memory.StructFactory import OffsetStruct
 from .simulator import Models, Manager, Craft
-from .solvers import Solver
+from .solvers import Skyrim23
 
 recipe_sheet = realm.game_data.get_sheet('Recipe')
 craft_start_sig = "40 53 48 83 EC ? 48 8B D9 C6 81 ? ? ? ? ? E8 ? ? ? ? 48 8D 4B ?"
@@ -25,7 +25,7 @@ CraftStatus = OffsetStruct({
 })
 
 registered_solvers = [
-    Solver
+    Skyrim23.Skyrim23Solver
 ]
 
 # callback = None
@@ -89,6 +89,7 @@ class XivCraft(PluginBase):
 
         self._recipe = None
         self.solver = None
+        self.base_data=None
         self.register_event("log_event", self.chat_log_processor.process)
 
     def get_base_data(self):
@@ -100,7 +101,7 @@ class XivCraft(PluginBase):
 
     def get_current_craft(self):
         me = api.XivMemory.actor_table.get_me()
-        recipe, player = self.get_base_data()
+        recipe, player = self.base_data
         effects = dict()
         for eid, effect in me.effects.get_items():
             if eid in Manager.effects_id:
@@ -119,7 +120,7 @@ class XivCraft(PluginBase):
         )
 
     def craft_start(self, chat_log, regex_result):
-        recipe, player = self.get_base_data()
+        recipe, player = self.base_data = self.get_base_data()
         self.logger.info("start recipe:" + recipe.detail_str)
         for solver in registered_solvers:
             if solver.suitable(recipe=recipe, player=player):
@@ -127,22 +128,23 @@ class XivCraft(PluginBase):
                 break
         if self.solver is not None:
             self.logger.info("solver found, starting to solve...")
-            ans = self.solver.process()
-            if ans is not None: callback(ans)
+            ans = self.solver.process(None,None)
+            if ans is not None and callback is not None: callback(ans)
         else:
             self.logger.info("no solver found, please add a solver for this recipe")
 
     def craft_next(self, chat_log, regex_result):
-        sleep(0.3)
+        sleep(0.5)
         if self.solver is not None:
-            skill_name = regex_result.group(2) + ('' if regex_result.group(3) != "失败" else ':fail')
-            self.logger.info("use %s" % skill_name)
+            skill=Manager.skills[regex_result.group(2) + ('' if regex_result.group(3) != "失败" else ':fail')]()
+            #self.logger.info("use %s" % skill_name)
             craft = self.get_current_craft()
-            if skill_name == "观察":
+            if skill == "观察":
                 craft.add_effect("观察", 1)
                 craft.merge_effects()
-            ans = self.solver.process(craft, Manager.skills[skill_name])
-            if ans is not None: callback(ans)
+            ans = self.solver.process(craft,skill)
+            self.logger.info("suggested skill '%s'" % ans)
+            if ans and callback is not None: callback(ans)
 
     def craft_end(self, chat_log, regex_result):
         self.solver = None

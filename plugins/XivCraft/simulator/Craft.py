@@ -1,8 +1,7 @@
 import math
-from copy import deepcopy
+from typing import Union
 
 from FFxivPythonTrigger.SaintCoinach import realm
-from FFxivPythonTrigger.Logger import info
 from . import Manager, Models
 
 lv_dif = dict()
@@ -18,6 +17,10 @@ for _row in craft_lv_dif_sheet:
 
 clvBase = [120, 260, 390]
 clvAdjust = [0, 5, 10, 13, 16, 19, 22, 25, 28, 30]
+
+
+class CheckUnpass(Exception):
+    pass
 
 
 class CraftData(object):
@@ -57,12 +60,18 @@ class Craft(object):
         self.current_quality = current_quality
         self.current_durability = current_durability if current_durability is not None else recipe.max_durability
         self.current_cp = current_cp if current_cp is not None else player.max_cp
-        self.status = status if status is not None else Manager.mStatus.DEFAULT_STATUS
+        self.status = status if status is not None else Manager.mStatus.DEFAULT_STATUS()
         self.effects = effects if effects is not None else dict()
         self.craft_data = craft_data if craft_data is not None else CraftData(recipe, player)
         self.effect_to_add: dict[str, Models.Effect] = dict()
 
-    def clone(self):
+    def is_finished(self):
+        return self.current_progress >= self.recipe.max_difficulty
+
+    def clone(self) -> 'Craft':
+        new_effects=dict()
+        for e in self.effects.values():
+            new_effects[e.name]=e.__class__(e.param)
         return Craft(
             recipe=self.recipe,
             player=self.player,
@@ -72,7 +81,7 @@ class Craft(object):
             current_durability=self.current_durability,
             current_cp=self.current_cp,
             status=self.status,
-            effects=deepcopy(self.effects),
+            effects=new_effects,
             craft_data=self.craft_data,
         )
 
@@ -86,40 +95,60 @@ class Craft(object):
         self.effects |= self.effect_to_add
         self.effect_to_add.clear()
 
-    def use_skill(self, skill: Models.Skill):
+    def get_skill_progress(self, skill: Union[Models.Skill, str]) -> int:
         if type(skill) == str:
             skill = Manager.skills[skill]()
+        effect_progress = 0
+        for e in self.effects.values():
+            effect_progress += e.progress_factor(self, skill)
+        skill_progress = math.floor(skill.progress(self) * (1 + effect_progress)) / 100
+        base_progress_status = math.floor(self.craft_data.base_process * (1 + self.status.progress_factor(self, skill)))
+        return math.floor(skill_progress * base_progress_status)
 
+    def get_skill_quality(self, skill: Union[Models.Skill, str]) -> int:
         if "内静" not in self.effects:
             base_quality = self.craft_data.base_quality[0]
         else:
             base_quality = self.craft_data.base_quality[self.effects["内静"].param - 1]
+        if type(skill) == str:
+            skill = Manager.skills[skill]()
+        effect_quality = 0
+        for e in self.effects.values():
+            effect_quality += e.quality_factor(self, skill)
+        skill_quality = math.floor(skill.quality(self) * (1 + effect_quality)) / 100
+        base_quality_status = math.floor(base_quality * (1 + self.status.quality_factor(self, skill)))
+        return math.floor(skill_quality * base_quality_status)
+
+    def get_skill_durability(self, skill: Union[Models.Skill, str]) -> int:
+        if type(skill) == str:
+            skill = Manager.skills[skill]()
+        effect_durability = 1
+        for e in self.effects.values():
+            effect_durability *= 1 + e.durability_factor(self, skill)
+        return math.ceil(skill.durability(self) * effect_durability * (1 + self.status.durability_factor(self, skill)))
+
+    def get_skill_cost(self, skill: Union[Models.Skill, str]) -> int:
+        if type(skill) == str:
+            skill = Manager.skills[skill]()
+        effect_cost = 1
+        for e in self.effects.values():
+            effect_cost *= 1 + e.cost_factor(self, skill)
+        return math.ceil(skill.cost(self) * effect_cost * (1 + self.status.cost_factor(self, skill)))
+
+    def use_skill(self, skill: Union[Models.Skill, str], check_mode=False) -> 'Craft':
+        if type(skill) == str:
+            skill = Manager.skills[skill]()
 
         self.effect_to_add.clear()
 
-        effect_progress = 0
-        effect_quality = 0
-        effect_durability = 1
-        effect_cost = 1
-        for e in self.effects.values():
-            effect_progress += e.progress_factor(self, skill)
-            effect_quality += e.quality_factor(self, skill)
-            effect_durability *= 1 + e.durability_factor(self, skill)
-            effect_cost *= 1 + e.cost_factor(self, skill)
+        added_progress = self.get_skill_progress(skill)
+        added_quality = self.get_skill_quality(skill)
+        used_durability = self.get_skill_durability(skill)
+        used_cp = self.get_skill_cost(skill)
 
-        skill_progress = math.floor(skill.progress(self) * (1 + effect_progress)) / 100
-        base_progress_status = math.floor(self.craft_data.base_process * (1 + self.status.progress_factor(self, skill)))
-        added_progress = math.floor(skill_progress * base_progress_status)
-
-        skill_quality = math.floor(skill.quality(self) * (1 + effect_quality)) / 100
-        base_quality_status = math.floor(base_quality * (1 + self.status.quality_factor(self, skill)))
-        added_quality = math.floor(skill_quality * base_quality_status)
-
-        used_durability = math.ceil(skill.durability(self) * effect_durability * (1 + self.status.durability_factor(self, skill)))
-
-        used_cp = math.ceil(skill.cost(self) * effect_cost * (1 + self.status.cost_factor(self, skill)))
-
-        info("craft simulator","%s/%s/%s/%s"%(added_progress,added_quality,used_durability,used_cp))
+        if check_mode:
+            if self.current_progress + added_progress < self.recipe.max_difficulty and self.current_durability <= used_durability: raise CheckUnpass()
+            if self.current_cp < used_cp: raise CheckUnpass()
 
         self.current_progress = min(self.current_progress + added_progress, self.recipe.max_difficulty)
         self.current_quality = min(self.current_quality + added_quality, self.recipe.max_quality)
@@ -133,6 +162,7 @@ class Craft(object):
             for e in list(self.effects.values()):
                 e.after_round(self, skill)
         self.merge_effects()
+        return self
 
     def __str__(self):
         return """********** round {round} **********
