@@ -1,4 +1,6 @@
 import sys
+import os
+from pathlib import Path
 from threading import Lock, Thread
 from time import time
 from traceback import format_exc
@@ -106,7 +108,7 @@ def register_module(module) -> List[PluginBase]:
     if type(module) == str:
         _logger.debug("try load plugin \"%s\" dynamically" % module)
         try:
-            module = import_module("plugins.%s" % module)
+            module = import_module(module)
         except Exception:
             _logger.error('error occurred during import module:\" %s\"' % module)
             _logger.error('error trace:\n' + format_exc())
@@ -120,7 +122,7 @@ def register_module(module) -> List[PluginBase]:
 
 def unload_module(module):
     if type(module) == str:
-        module = import_module("plugins.%s" % module)
+        module = import_module(module)
     for attr_name in dir(module):
         attr = getattr(module, attr_name)
         if isclass(attr) and issubclass(attr, PluginBase) and attr != PluginBase:
@@ -129,7 +131,7 @@ def unload_module(module):
 
 def reload_module(module):
     if type(module) == str:
-        module = import_module("plugins.%s" % module)
+        module = import_module(module)
     unload_module(module)
     module_name = module.__name__
     for sub_module in list(sys.modules.keys()):
@@ -231,6 +233,15 @@ def start():
         close()
 
 
+def add_path(path: str):
+    if os.path.exists(path):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+        if path not in _storage.data['paths']:
+            _storage.data['paths'].append(path)
+            _storage.save()
+
+
 LOG_FILE_FORMAT = 'log_{int_time}.txt'
 STORAGE_DIRNAME = "Core"
 LOGGER_NAME = "Main"
@@ -250,13 +261,17 @@ _events: Dict[any, Set[EventCallback]] = dict()
 _allow_create_missions: bool = True
 
 _am: AddressManager.AddressManager
-FFxiv_Version: str
 frame_inject: FrameInject.FrameInjectHook
 
-try:
-    _am = AddressManager.AddressManager(_storage.data.setdefault('address', dict()), _logger)
-    frame_inject = FrameInject.FrameInjectHook(_am.get("frame_inject", **Sigs.frame_inject))
-    frame_inject.enable()
-    _storage.save()
-except FileNotFoundError:
-    pass
+_am = AddressManager.AddressManager(_storage.data.setdefault('address', dict()), _logger)
+frame_inject = FrameInject.FrameInjectHook(_am.get("frame_inject", **Sigs.frame_inject))
+frame_inject.enable()
+_storage.save()
+
+plugin_path = Path(os.getcwd()) / 'plugins'
+plugin_path.mkdir(exist_ok=True)
+sys.path.insert(0, str(plugin_path))
+for path in _storage.data.setdefault('paths', list()):
+    _logger.debug("add plugin path:%s"%path)
+    sys.path.insert(0, path)
+_storage.save()
